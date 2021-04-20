@@ -123,18 +123,19 @@ if [ $DEVICE_TYPE = "gpu" ]; then
     if [[ $ORTMODULE_BUILD = false ]]; then
       ${PYTHON_EXE} -m pip install -r ${0/%install_deps.sh/training\/requirements.txt}
     else
-      ${PYTHON_EXE} -m pip install -r ${0/%install_deps.sh/training\/ortmodule\/stage1\/requirements.txt}
       if [[ $TARGET_ROCM = false ]]; then
+        ${PYTHON_EXE} -m pip install -r ${0/%install_deps.sh/training\/ortmodule\/stage1\/requirements.txt}
         # Due to a [bug on DeepSpeed](https://github.com/microsoft/DeepSpeed/issues/663), we install it separately through ortmodule/stage2/requirements.txt
         ${PYTHON_EXE} -m pip install -r ${0/%install_deps.sh/training\/ortmodule\/stage2\/requirements.txt}
       else
-	# remove triton requirement from getting triggered
+        ${PYTHON_EXE} -m pip install -r ${0/%install_deps.sh/training\/ortmodule\/stage1\/requirements-rocm.txt}
         ${PYTHON_EXE} -m pip install fairscale
+	# remove triton requirement from getting triggered in requirements-sparse_attn.txt
         git clone https://github.com/ROCmSoftwarePlatform/DeepSpeed
         cd DeepSpeed &&\
-	  rm requirements/requirements-sparse_attn.txt &&\
-	  ${PYTHON_EXE} setup.py bdist_wheel &&\
-	  ${PYTHON_EXE} -m pip install dist/deepspeed*.whl &&\
+          rm requirements/requirements-sparse_attn.txt &&\
+          ${PYTHON_EXE} setup.py bdist_wheel &&\
+          ${PYTHON_EXE} -m pip install dist/deepspeed*.whl &&\
 	  cd ..
       fi
     fi
